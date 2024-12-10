@@ -1,0 +1,597 @@
+#include <iostream>
+#include <unistd.h>
+using namespace std;
+
+
+struct QueueNode {
+    string username;
+    QueueNode* next;
+};
+
+// Queue head and tail pointers for each book
+struct Queue {
+    QueueNode* front;
+    QueueNode* rear;
+};
+
+void initializeQueue(Queue& q) {
+    q.front = nullptr;
+    q.rear = nullptr;
+}
+
+void enqueue(Queue& q, const string& username) {
+    QueueNode* newNode = new QueueNode{username, nullptr};
+    if (q.rear == nullptr) {
+        q.front = q.rear = newNode;
+    } else {
+        q.rear->next = newNode;
+        q.rear = newNode;
+    }
+}
+
+string dequeue(Queue& q) {
+    if (q.front == nullptr) {
+        return ""; // Queue is empty
+    }
+    QueueNode* temp = q.front;
+    string user = temp->username;
+    q.front = q.front->next;
+    if (q.front == nullptr) {
+        q.rear = nullptr;
+    }
+    delete temp;
+    return user;
+}
+
+bool isQueueEmpty(const Queue& q) {
+    return q.front == nullptr;
+}
+
+string peekQueue(const Queue& q) {
+    return q.front ? q.front->username : "";
+}
+
+
+struct User{
+   int UserId;
+  string username;
+  string password;
+};
+struct Book{
+int id;
+string book_title;
+string book_author;
+string book_Genre;
+bool isborrowed;
+Book *next;
+Queue waitingList;  // Queue to maintain the waiting list of users
+};
+
+// Global variables
+Book* books = nullptr; // Dynamic array to store books
+int bookCount = 0;     // Number of books added
+int bookCapacity = 0;  // Current capacity of the array
+
+
+
+
+
+
+
+
+
+
+// function prototype
+void user_registeration();
+void login(User user);
+void MainMenu();
+void Featuresmenu();
+void addBook();
+void search();
+void DisplayBooks();
+void BorrowBook();
+void DeleteBook();
+void ReturnBook();
+void SortBooksByID();
+
+
+
+
+
+
+
+
+
+
+void user_registeration(){
+  system("cls");
+
+User user;
+
+cout<<"Enter UserID"<<endl;
+cin>>user.UserId;
+cout<<"Enter username for this user"<<endl;
+cin>>user.username;
+cout<<"Enter Password for this user"<<endl;
+cin>>user.password;
+
+// after creating user , login
+
+login(user);
+
+
+}
+
+
+void login(User user){
+system("cls");
+
+string username,password;
+cout<<"Enter Username"<<endl;
+cin>>username;
+cout <<"Enter password"<<endl;
+cin>>password;
+
+int stop = 1; // varaiable to control the loop
+
+// Check if the entered username and password match the passed user
+
+  while (stop) {
+  if (user.username == username && user.password == password) {
+  cout << "Login successful! Welcome, " << user.username << endl;
+  sleep(1.5); // to wait 1 second before oppening main Menu
+  system("cls");
+  Featuresmenu();
+  stop =0;
+
+  }
+  else {
+  cout << "Invalid username or password. Please try again." << endl;
+  sleep(1);
+  login(user);
+}
+}
+
+
+}
+
+
+
+
+
+
+
+
+void Featuresmenu(){
+  system("cls");
+  cout << "\n================ Library Management System ================\n";
+  cout << "1. Search for a Book\n";
+  cout << "2. Add a Book\n";
+  cout << "3. Delete a Book\n";
+  cout << "5. Borrow a Book\n";
+  cout << "6. Return a Book\n";
+  cout << "7. Display all books\n";
+  cout << "8. Sort Available Books \n";
+  cout << "9. Exit\n";
+  cout << "==========================================================\n";
+  cout << "Enter your choice: ";
+
+
+int choice;
+cin>>choice;
+
+switch (choice){
+  case 1:
+  search();
+  break;
+  case 2:
+  addBook();
+  break;
+  case 3:
+  DeleteBook();
+  break;
+  case 5:
+  BorrowBook();
+  break;
+  case 6:
+  ReturnBook();
+  case 7:
+  DisplayBooks();
+  break;
+  case 8:
+  SortBooksByID();
+  exit;
+  case 9:
+  exit(1);
+
+
+}
+
+
+
+
+
+
+};
+
+
+
+
+
+
+
+void MainMenu() {
+    cout << "\n================ Library Management System ================\n";
+
+    cout << "1. Register a User\n";
+    cout << "2. Exit\n";
+    cout << "==========================================================\n";
+    cout << "Enter your choice: ";
+    int choice;
+    cin>>choice;
+
+    switch (choice) {
+      case 1: user_registeration();
+      case 2: exit(1); // exiting with status code 1
+
+    }
+
+
+
+
+}
+
+
+void addBook() {
+
+system("cls");
+
+cout<<"Welcome to add book feature !!"<<endl;
+
+char choice = 'Y';
+
+
+    while (toupper(choice) == 'Y') {
+        // Check if the array needs to grow
+        if (bookCount == bookCapacity) {
+            int newCapacity;
+
+            // Set initial capacity or increase capacity
+            if (bookCapacity == 0) {
+                newCapacity = 1; // Initial capacity
+            } else {
+                newCapacity = bookCapacity * 2; // Double the capacity
+            }
+
+            // Create a new array with updated capacity
+            Book* newBooks = new Book[newCapacity];
+
+            // Copy existing books into the new array
+            for (int i = 0; i < bookCount; i++) {
+                newBooks[i] = books[i];
+            }
+
+            // Free old array memory and update pointers
+            delete[] books;
+            books = newBooks;
+            bookCapacity = newCapacity; // Update the global capacity
+        }
+
+        // Add new book details
+        cout << "Enter Book ID: ";
+        cin >> books[bookCount].id;
+        cin.ignore(); // Clear input buffer
+
+        cout << "Enter Book Title: ";
+        getline(cin, books[bookCount].book_title);
+
+        cout << "Enter Book Author: ";
+        getline(cin, books[bookCount].book_author);
+
+        cout << "Enter Book Genre: ";
+        getline(cin, books[bookCount].book_Genre);
+
+        books[bookCount].isborrowed = false; // New books are not borrowed
+        bookCount++; // Increment book count
+
+        cout << "Book added successfully."<<endl;
+
+        // Ask if the user wants to add another book
+        cout << "Do you want to add another book? (Y/N): ";
+        cin >> choice;
+    }
+
+    cout<<"Transfering you to main menu ..."<<endl;
+    sleep(1);
+    Featuresmenu();
+
+
+
+
+
+}
+
+
+void search(){
+
+system("cls");
+
+cout<<"Welcome to search feature !!"<<endl;
+cout<<"Please Enter book id"<<endl;
+int bookId;
+cin>>bookId;
+
+bool found = false;  // Flag to check if the book is found
+
+    // Search for the book by ID
+  for (int i = 0; i < bookCount; i++) {
+        if (books[i].id == bookId) {
+            cout << "Book found!" << endl;
+            cout << "Book ID: " << books[i].id << endl;
+            cout << "Title: " << books[i].book_title << endl;
+            cout << "Author: " << books[i].book_author << endl;
+            cout << "Genre: " << books[i].book_Genre << endl;
+            if (books[i].isborrowed){cout << "Status: Borrowed" << endl;}
+          else {cout << "Status: Available" << endl;}
+            found = true;
+            break;
+
+        }
+
+    }
+
+
+    if (!found) {
+        cout << "No book found with ID " << bookId << endl;
+        cout<<"Returning to main menu ...."<<endl;
+        sleep(1);
+        Featuresmenu();
+
+
+    }
+
+
+    // Return to the Features menu after showing the book details
+       cout << "\nPress any key to return to the Features Menu...";
+       cin.ignore();  // To ignore any leftover newline character in the buffer
+       cin.get();     // Wait for user input to return to the Features menu
+       Featuresmenu();  // Call the Featuresmenu function to go back
+
+
+
+
+}
+
+
+
+
+void DisplayBooks() {
+    system("cls");  // Clears the screen
+    cout << "============= All Books =============\n";
+
+    if (bookCount == 0) {
+        cout << "No books available in the library." << endl;
+        return;
+    }
+
+    // Loop through all books and display their details
+    for (int i = 0; i < bookCount; i++) {
+        cout << "Book ID: " << books[i].id << endl;
+        cout << "Title: " << books[i].book_title << endl;
+        cout << "Author: " << books[i].book_author << endl;
+        cout << "Genre: " << books[i].book_Genre << endl;
+
+        if (books[i].isborrowed) {
+            cout << "Status: Borrowed" << endl;
+        } else {
+            cout << "Status: Available" << endl;
+        }
+        cout << "-------------------------------------\n";
+    }
+
+    // After displaying all books, return to the Features menu
+    cout << "\nPress any key to return to the Features Menu...";
+    cin.ignore();  // To ignore any leftover newline character in the buffer
+    cin.get();     // Wait for user input
+    Featuresmenu();  // Call the Featuresmenu function to go back
+}
+
+
+
+// Function to borrow a book
+void BorrowBook() {
+    system("cls");
+    cout << "============= Borrow a Book =============\n";
+    if (bookCount == 0) {
+        cout << "No books available in the library." << endl;
+        cout << "Press any key to return to the Features Menu...";
+        cin.ignore();
+        cin.get();
+        Featuresmenu();
+        return;
+    }
+
+    cout << "Enter the Book ID to borrow: ";
+    int bookId;
+    cin >> bookId;
+
+    bool bookFound = false;
+
+    for (int i = 0; i < bookCount; i++) {
+        if (books[i].id == bookId) {
+            bookFound = true;
+            if (books[i].isborrowed) {
+                cout << "Sorry, the book is currently borrowed. Would you like to join the waiting list? (Y/N): ";
+                char choice;
+                cin >> choice;
+                if (toupper(choice) == 'Y') {
+                    string username;
+                    cout << "Enter your username to join the waiting list: ";
+                    cin >> username;
+                    enqueue(books[i].waitingList, username);
+                    cout << "You have been added to the waiting list.\n";
+                } else {
+                    cout << "Returning to Features Menu...\n";
+                }
+            } else {
+                books[i].isborrowed = true;
+                cout << "You have successfully borrowed the book: " << books[i].book_title << endl;
+            }
+            break;
+        }
+    }
+
+    if (!bookFound) {
+        cout << "Book with ID " << bookId << " not found in the library.\n";
+    }
+
+    cout << "Press any key to return to the Features Menu...";
+    cin.ignore();
+    cin.get();
+    Featuresmenu();
+}
+
+
+
+
+void DeleteBook() {
+  system("cls");
+    if (bookCount == 0) {
+        cout << "No books available to delete." << endl;
+        return;
+    }
+
+    cout << "Enter the ID of the book you want to delete: ";
+    int bookId;
+    cin >> bookId;
+
+    int indexToDelete = -1;
+
+    // Find the book with the given ID
+    for (int i = 0; i < bookCount; i++) {
+        if (books[i].id == bookId) {
+            indexToDelete = i;
+            break;
+        }
+    }
+
+    // If book not found
+    if (indexToDelete == -1) {
+        cout << "Book with ID " << bookId << " not found." << endl;
+        return;
+    }
+
+    // Shift books to remove the selected book
+    for (int i = indexToDelete; i < bookCount - 1; i++) {
+        books[i] = books[i + 1];
+    }
+
+    // Reduce the book count
+    bookCount--;
+
+    cout << "Book with ID " << bookId << " has been successfully deleted." << endl;
+    cout << "Press any key to return to the Features Menu...";
+    cin.ignore();
+    cin.get();
+    Featuresmenu();
+}
+
+void ReturnBook() {
+    system("cls"); // Clear the screen for better readability.
+    if (bookCount == 0) {
+        cout << "No books available in the library." << endl;
+        cout << "Press any key to return to the Features Menu...";
+        cin.ignore();
+        cin.get();
+        Featuresmenu();
+        return;
+    }
+
+    cout << "Enter the Book ID you want to return: ";
+    int bookId;
+    cin >> bookId;
+
+    // Find the book by ID
+    for (int i = 0; i < bookCount; i++) {
+        if (books[i].id == bookId) {
+            if (!books[i].isborrowed) {
+                cout << "This book is not borrowed." << endl;
+                cout << "Press any key to return to the Features Menu...";
+                cin.ignore();
+                cin.get();
+                Featuresmenu();
+                return;
+            }
+
+            // Mark the book as available
+            books[i].isborrowed = false;
+            cout << "Book returned successfully!" << endl;
+
+            cout << "Press any key to return to the Features Menu...";
+            cin.ignore();
+            cin.get();
+            Featuresmenu();
+            return;
+        }
+    }
+
+    cout << "Book with ID " << bookId << " not found." << endl;
+    cout << "Press any key to return to the Features Menu...";
+    cin.ignore();
+    cin.get();
+    Featuresmenu();
+}
+
+void SortBooksByID() {
+    system("cls"); // Clear the screen for better readability.
+
+    if (bookCount == 0) {
+        cout << "No books available to sort." << endl;
+        cout << "Press any key to return to the Features Menu...";
+        cin.ignore();
+        cin.get();
+        Featuresmenu();
+        return;
+    }
+
+    // Selection sort algorithm
+    for (int i = 0; i < bookCount - 1; i++) {
+        int minIndex = i;
+        for (int j = i + 1; j < bookCount; j++) {
+            if (books[j].id < books[minIndex].id) {
+                minIndex = j;
+            }
+        }
+
+        // Swap books[i] with books[minIndex]
+        if (minIndex != i) {
+            Book temp = books[i];
+            books[i] = books[minIndex];
+            books[minIndex] = temp;
+        }
+    }
+
+    cout << "Books sorted successfully by ID!" << endl;
+
+    // Display sorted books
+    DisplayBooks();
+
+    cout << "Press any key to return to the Features Menu...";
+    cin.ignore();
+    cin.get();
+    Featuresmenu();
+}
+
+
+
+
+
+
+int main(){
+
+MainMenu();
+
+
+
+  return 0;
+}
